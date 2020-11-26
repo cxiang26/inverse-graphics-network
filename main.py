@@ -36,11 +36,11 @@ class CapsuleNetwork(pl.LightningModule):
 
         # each image is expression by 4 templates
         l1_loss = 0.
-        l1_loss += (intensity.abs().sum(-1).sum(-1) - 4).pow(2).mean()
+        l1_loss += (intensity.abs().sum(-1).sum(-1) - 7).pow(2).mean()
 
         # each template is used balanced
         l1_loss1 = 0.
-        l1_loss1 += (intensity.abs().sum(dim=0) - intensity.size(0)*4/9).pow(2).mean()
+        l1_loss1 += (intensity.abs().sum(dim=0) - intensity.size(0)*7/9).pow(2).mean()
 
         loss = rec_loss + 100 * l1_loss + l1_loss1
         self.log('loss', loss)
@@ -85,15 +85,15 @@ class CapsuleNetwork(pl.LightningModule):
                 recon,
                 nrow=8, pad_value=0, padding=1
             )
-            self.logger.experiment.add_image('recons', rg, self.current_epoch)
+            self.logger.experiment.add_image('val_recons', rg, self.current_epoch)
 
             temp = res.templates[0].unsqueeze(dim=1)
             rg = torchvision.utils.make_grid(temp, nrow=self.num_acrs, padding=1, pad_value=0)
-            self.logger.experiment.add_image('templates', rg, self.current_epoch)
+            self.logger.experiment.add_image('val_templates', rg, self.current_epoch)
 
             trans_temp = res.transformed_templates.cpu().detach()[:8].view(8*9, 1, 28, 28)
             rg = torchvision.utils.make_grid(trans_temp, nrow=self.num_acrs, padding=1, pad_value=0)
-            self.logger.experiment.add_image('trans_templates', rg, self.current_epoch)
+            self.logger.experiment.add_image('val_trans_templates', rg, self.current_epoch)
         return loss
 
     def configure_optimizers(self):
